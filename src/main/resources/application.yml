@@ -1,0 +1,29 @@
+server:
+  port : 9999
+acs:
+  host:
+    proxy-port: 80
+    proxy: localhost:8080
+    user: admin
+    pwd: YWRtaW4=
+    url: http://localhost:8080/alfresco/
+
+
+shedule:
+  cron:
+    expression: 0 0/2 * ? * *
+    enable: true
+    
+logging:
+  config: src/main/resources/log4j2.xml 
+  level:
+    root: ERROR
+    org.springframework.web: ERROR
+    com.plusyoursoftech.alfresco.utils: INFO
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 1800000
+        readTimeout: 1800000
