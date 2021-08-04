@@ -1,4 +1,4 @@
-package com.plusyoursoftech.utilities.config;
+package com.alfresco.utilities.config;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import com.plusyoursoftech.utilities.service.AlfrescoContentService;
+import com.alfresco.utilities.service.AlfrescoContentService;
 
 /**
  * @author Plusyoursoftech

@@ -1,4 +1,4 @@
-package com.plusyoursoftech.utilities.saml;
+package com.alfresco.utilities.saml;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

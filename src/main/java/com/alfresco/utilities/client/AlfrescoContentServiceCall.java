@@ -1,7 +1,9 @@
-package com.plusyoursoftech.utilities.client;
+package com.alfresco.utilities.client;
 
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -15,6 +17,8 @@ import feign.Headers;
  * @author Plusyoursoftech
  *
  */
+@Component
+@FeignClient(name = "alfrescoContentServiceCall", url = "${acs.host.url}")
 public interface AlfrescoContentServiceCall {
 
 	@RequestMapping(method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, value = "api/-default-/public/alfresco/versions/1/people?skipCount={skipCount}&maxItems={maxItems}")

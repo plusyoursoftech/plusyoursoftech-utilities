@@ -1,4 +1,4 @@
-package com.plusyoursoftech.utilities;
+package com.alfresco.utilities;
 
 import javax.annotation.PostConstruct;
 
@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
 
-import com.plusyoursoftech.utilities.config.ApplicationConfig;
+import com.alfresco.utilities.config.ApplicationConfig;
 
 /**
  * @author plusyoursoftech-utilities
@@ -16,7 +16,6 @@ import com.plusyoursoftech.utilities.config.ApplicationConfig;
 public class AuthenticationUtils {
 
 	private String acsLogin;
-	private String sscAcsLogin;
 	@Autowired
 	private ApplicationConfig applicationConfig;
 
@@ -37,10 +36,6 @@ public class AuthenticationUtils {
 
 	public String getAcsLogin() {
 		return acsLogin;
-	}
-
-	public String getAcsSscLogin() {
-		return sscAcsLogin;
 	}
 
 }

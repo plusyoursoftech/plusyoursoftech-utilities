@@ -1,4 +1,4 @@
-package com.plusyoursoftech.utilities.service;
+package com.alfresco.utilities.service;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -9,18 +9,24 @@ import java.util.Map;
 
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
+import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Base64Utils;
 
+import com.alfresco.utilities.AuthenticationUtils;
+import com.alfresco.utilities.JSONResponseParsing;
+import com.alfresco.utilities.client.AlfrescoContentServiceCall;
+import com.alfresco.utilities.config.ApplicationConfig;
+import com.alfresco.utilities.model.RequestParameters;
+import com.alfresco.utilities.model.UserData;
+import com.alfresco.utilities.saml.DecodeSAMLResponse;
+import com.alfresco.utilities.saml.SAMLAssertionUserMapping;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.plusyoursoftech.utilities.AuthenticationUtils;
-import com.plusyoursoftech.utilities.JSONResponseParsing;
-import com.plusyoursoftech.utilities.client.AlfrescoContentServiceCall;
-import com.plusyoursoftech.utilities.model.UserData;
 
 /**
  * @author plusyoursoftech
@@ -31,10 +37,16 @@ public class AlfrescoContentService {
 
 	@Autowired
 	private AuthenticationUtils authenticationUtils;
+	@Autowired
 	private AlfrescoContentServiceCall alfrescoContentServiceCall;
-
+	@Autowired
+	private ApplicationConfig applicationConfig;
+	
 	private String basicAuth;
-
+	private void buildBasicAuth()
+	{
+		basicAuth = authenticationUtils.getAcsLogin();
+	}
 	Boolean hasMoreItems;
 
 	private Map<String, UserData> getAllUsersFromAlfresco() {
@@ -194,5 +206,28 @@ public class AlfrescoContentService {
 		});
 
 		return "Users are deleted";
+	}
+
+	public void syncUser(RequestParameters requestParameters) {
+		buildBasicAuth();
+		logger.info(" syncUser started  --- > " + requestParameters);
+		DecodeSAMLResponse decodeSAMLResponse =new DecodeSAMLResponse();
+		
+		try {
+			SAMLAssertionUserMapping userMapping = decodeSAMLResponse.getBase64DecodedMessage(requestParameters.getSamlResponse());
+			UserData userData = mapUserWithSamlResponse(userMapping);
+			createUser(userData);
+			
+		} catch (MessageDecodingException e) {
+			logger.error("MessageDecodingException :",e);
+		}
+	}
+	private UserData mapUserWithSamlResponse(SAMLAssertionUserMapping userMapping){
+		UserData userData = new UserData();
+		userData.setUserName(userMapping.getId());
+		userData.setEmail(userMapping.getEmail());
+		userData.setFirstName(userMapping.getFirstName());
+		userData.setLastName(userMapping.getLastName());
+		return userData;
 	}
 }

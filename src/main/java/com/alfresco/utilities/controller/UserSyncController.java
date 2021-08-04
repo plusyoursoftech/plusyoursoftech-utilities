@@ -1,4 +1,4 @@
-package com.plusyoursoftech.utilities.controller;
+package com.alfresco.utilities.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.plusyoursoftech.utilities.model.RequestParameters;
-import com.plusyoursoftech.utilities.service.AlfrescoContentService;
+import com.alfresco.utilities.model.RequestParameters;
+import com.alfresco.utilities.service.AlfrescoContentService;
 
 /**
  * @author Plusyoursoftech

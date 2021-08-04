@@ -1,4 +1,4 @@
-package com.plusyoursoftech.utilities;
+package com.alfresco.utilities;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import org.apache.tomcat.util.json.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plusyoursoftech.utilities.model.UserData;
+import com.alfresco.utilities.model.UserData;
 
 /**
  * @author plusyoursoftech-utilities

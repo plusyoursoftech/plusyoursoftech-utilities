@@ -1,4 +1,4 @@
-package com.plusyoursoftech.utilities;
+package com.alfresco.utilities;
 
 /**
  * @author plusyoursoftech-utilities

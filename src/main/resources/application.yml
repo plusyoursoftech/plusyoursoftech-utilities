@@ -1,5 +1,5 @@
 server:
-  port : 9999
+  port : 9098
 acs:
   host:
     proxy-port: 80
@@ -19,7 +19,7 @@ logging:
   level:
     root: ERROR
     org.springframework.web: ERROR
-    com.plusyoursoftech.alfresco.utils: INFO
+    com.plusyoursoftech.utilities: INFO
 
 feign:
   client:

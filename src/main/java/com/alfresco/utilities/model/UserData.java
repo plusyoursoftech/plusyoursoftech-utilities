@@ -1,4 +1,4 @@
-package com.plusyoursoftech.utilities.model;
+package com.alfresco.utilities.model;
 
 public class UserData {
 	private String userName;

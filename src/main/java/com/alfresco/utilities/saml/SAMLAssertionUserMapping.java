@@ -1,4 +1,4 @@
-package com.plusyoursoftech.utilities.saml;
+package com.alfresco.utilities.saml;
 
 public class SAMLAssertionUserMapping {
      private String id;

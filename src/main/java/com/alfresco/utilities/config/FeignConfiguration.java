@@ -1,4 +1,4 @@
-package com.plusyoursoftech.utilities.config;
+package com.alfresco.utilities.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

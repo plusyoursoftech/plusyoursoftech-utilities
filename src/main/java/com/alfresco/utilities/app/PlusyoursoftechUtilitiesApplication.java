@@ -1,4 +1,4 @@
-package com.plusyoursoftech.utilities.app;
+package com.alfresco.utilities.app;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
