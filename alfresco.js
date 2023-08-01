@@ -19,6 +19,7 @@ YUI().use('node', 'event', 'form-validator', function(Y) {
   // Validate the form on button click
   submitButton.on('click', function(e) {
     e.preventDefault();
+    clearErrorStyles(); // Clear any existing error styles
     if (validator.validateForm()) {
       submitForm();
     } else {
@@ -32,13 +33,21 @@ YUI().use('node', 'event', 'form-validator', function(Y) {
     form.submit();
   }
 
-  // Display error messages for invalid fields
+  // Display error messages and add red border to input fields with errors
   function displayErrors() {
     var errors = validator.getErrors();
     for (var field in errors) {
       var errorMessage = errors[field];
-      var errorSpan = Y.one('#' + field + 'Error');
-      errorSpan.set('text', errorMessage);
+      var inputField = Y.one('#' + field);
+      inputField.setStyle('border', '1px solid red');
     }
+  }
+
+  // Clear error styles when the form is revalidated
+  function clearErrorStyles() {
+    var inputFields = form.all('input');
+    inputFields.each(function(inputField) {
+      inputField.setStyle('border', '1px solid #ccc');
+    });
   }
 });
