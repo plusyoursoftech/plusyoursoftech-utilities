@@ -1,0 +1,290 @@
+/**
+ * Copyright (C) 2017 Alfresco Software Limited.
+ * <p/>
+ * This file is part of the Alfresco SDK project.
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.alfresco.model.ContentModel;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.model.FileFolderService;
+import org.alfresco.service.cmr.repository.ContentService;
+import org.alfresco.service.cmr.repository.MimetypeService;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.tagging.TaggingService;
+import org.alfresco.service.namespace.NamespaceService;
+import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
+import org.apache.commons.io.FileUtils;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.springframework.extensions.surf.util.Content;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import com.Plus.alfresco.models.PlusModel;
+
+public abstract class PlusBaseTest {
+
+	@Mock
+	protected ServiceRegistry serviceRegistry;
+	@Mock
+	protected SearchService searchService;
+	@Mock
+	protected NodeService nodeService;
+	@Mock
+	protected TransactionService transactionService;
+	@Mock
+	protected RetryingTransactionHelper retryTransactionHelper;
+	@Mock
+	protected TaggingService taggingService;
+	@Mock
+	protected MimetypeService mimetypeService;
+	@Mock
+	protected NamespaceService namespaceService;
+    @Mock
+	protected ContentService contentService;
+    @Mock
+	protected FileFolderService fileFolderService;
+	
+    
+	protected String nodeRefStr = "workspace://SpacesStore/5a12ced3-c4a5-4776-9cb5-1df37bee4f93";
+	protected NodeRef nodeRef = new NodeRef(nodeRefStr);
+	protected static final String TRACKING_ID = "trackingId";
+	protected static final String TRACKING_ID_VALUE = "TICKET_8840d12a2a1cc5c2ac2334c9539440c027e08917";
+	protected static final String BASE_REQUEST_FILE_LOCATION = "./src/test/resources/test_data/";
+
+	protected String requestContent;
+	protected WebScriptRequest req;
+	protected WebScriptResponse res;
+	@Mock
+	protected WebScriptResponse response;
+	protected void baseSetup() throws Exception {
+		MockitoAnnotations.initMocks(this);
+
+		when(serviceRegistry.getNodeService()).thenReturn(nodeService);
+
+		when(nodeService.getProperties(nodeRef)).thenReturn(setNodePropertiesForTest(nodeRef));
+		when(transactionService.getRetryingTransactionHelper()).thenReturn(retryTransactionHelper);
+
+		req = Mockito.mock(WebScriptRequest.class);
+		res = Mockito.mock(WebScriptResponse.class);
+		
+		Content content = Mockito.mock(Content.class);
+		String[] headerNames = { TRACKING_ID };
+		String[] headerValue = { TRACKING_ID_VALUE };
+		when(req.getHeaderNames()).thenReturn(headerNames);
+		when(req.getHeaderValues(TRACKING_ID)).thenReturn(headerValue);
+		when(req.getContent()).thenReturn(content);
+		when(req.getContentType()).thenReturn("multipart/form-data");
+		when(serviceRegistry.getTaggingService()).thenReturn(taggingService);
+		when(taggingService.getTags(nodeRef)).thenReturn(getTags());
+		when(serviceRegistry.getMimetypeService()).thenReturn(mimetypeService);
+		when(nodeService.getProperty(nodeRef, ContentModel.PROP_NAME)).thenReturn("test.pdf");
+		when(serviceRegistry.getContentService()).thenReturn(contentService);
+	}
+
+	private List<String> getTags() {
+		List<String> tags = new ArrayList<>();
+		tags.add("tage_1");
+		tags.add("tage_2");
+		return tags;
+	}
+
+	protected Map<QName, Serializable> setNodePropertiesForTest(NodeRef nodeRef) {
+		Map<QName, Serializable> responseObj = new HashMap<>();
+		responseObj.put(PlusModel.PROP_Plus_VIEWABLE, true);
+		responseObj.put(ContentModel.PROP_NAME, "test.pdf");
+		responseObj.put(ContentModel.PROP_TITLE, "test_title.pdf");
+		responseObj.put(ContentModel.PROP_DESCRIPTION, "Test_description");
+		responseObj.put(ContentModel.PROP_CREATED, "Created");
+		responseObj.put(ContentModel.PROP_CREATOR, "test_user");
+
+		return responseObj;
+	}
+
+	protected void requestData(String fileName) {
+		File file = new File(BASE_REQUEST_FILE_LOCATION + fileName);
+		try {
+			requestContent = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+			when(req.getContent().getContent()).thenReturn(requestContent);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+}
+=========================================================================================================================
+/**
+ * Copyright (C) 2017 Alfresco Software Limited.
+ * <p/>
+ * This file is part of the Alfresco SDK project.
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.Plus.alfresco.webscripts;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.alfresco.model.ContentModel;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.namespace.QName;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.Plus.alfresco.models.PlusModel;
+
+public class PlusDocumentSearchTest extends PlusBaseTest {
+
+	@InjectMocks
+	private PlusDocumentSearch PlusDocumentSearch;
+    @Mock 
+	ResultSet resultSet;
+	@Before
+	public void setup() throws Exception {
+		MockitoAnnotations.initMocks(this);
+		super.baseSetup();
+		
+		when(serviceRegistry.getSearchService()).thenReturn(searchService);
+		when(searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_FTS_ALFRESCO,
+				"TYPE:'Plus:document' AND sys\\:node\\-uuid:'7607b9d7-48ae-4688-80e9-3f8ad1882eb1'"))
+						.thenReturn(resultSet);
+		List<NodeRef> nodeList = new ArrayList<NodeRef>();
+		nodeList.add(nodeRef);
+		when(resultSet.getNodeRefs()).thenReturn(nodeList);		
+	}
+
+	
+	@Test
+	public void testControllerWithReqestDataNotResponseNull() {
+		requestData("search.json");
+		Map<String, Object> model = PlusDocumentSearch.executeImpl(req, null, null);
+		assertNotNull("Response Controller is null", model);
+	}
+	
+	@Test
+	public void testControllerWithReqestDataForValidData() {
+		requestData("search.json");
+		Map<String, Object> model = PlusDocumentSearch.executeImpl(req, null, null);
+		assertEquals("200", (String) model.get("code"));
+	}
+	
+	@Test
+	public void testControllerWithWaReqestData() {
+		requestData("search-wa.json");
+		
+		when(searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_FTS_ALFRESCO,
+				"TYPE:'Plus:document' AND Plus:docCategory:'Financial_Planning'"))
+						.thenReturn(resultSet);
+		List<NodeRef> nodeList = new ArrayList<NodeRef>();
+		nodeList.add(nodeRef);
+		when(resultSet.getNodeRefs()).thenReturn(nodeList);	
+		
+		Map<String, Object> model = PlusDocumentSearch.executeImpl(req, null, null);
+		assertNotNull("Response from Web Script Java Controller is null", model);
+		assertEquals("200", (String) model.get("code"));
+	}
+	@Test
+	public void testControllerWithWaMsrReqestData() {
+		requestData("search-wa-msr.json");
+		when(searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_FTS_ALFRESCO,
+				"TYPE:'Plus:document' AND NOT Plus:wmViewable:'false' AND NOT Plus:wmViewable:'true' AND sys\\:node\\-uuid:'7607b9d7-48ae-4688-80e9-3f8ad1882eb1'"))
+						.thenReturn(resultSet);
+		List<NodeRef> nodeList = new ArrayList<NodeRef>();
+		nodeList.add(nodeRef);
+		when(resultSet.getNodeRefs()).thenReturn(nodeList);	
+		
+		Map<String, Object> model = PlusDocumentSearch.executeImpl(req, null, null);
+		assertEquals("200", (String) model.get("code"));
+	}
+	
+	@Test
+	public void testControllerWithNoDataReqestData() {
+		requestData("search-no-data.json");
+		Map<String, Object> model = PlusDocumentSearch.executeImpl(req, null, null);
+		assertEquals("500", (String) model.get("code"));
+	}
+	
+	
+	protected Map<QName, Serializable> setNodePropertiesForViewableFalse(NodeRef nodeRef) {
+		Map<QName, Serializable> responseObj = new HashMap<>();
+		responseObj.put(PlusModel.PROP_Plus_VIEWABLE, false);
+		responseObj.put(ContentModel.PROP_NAME, "test.pdf");
+		responseObj.put(ContentModel.PROP_TITLE, "test_title.pdf");
+		responseObj.put(ContentModel.PROP_DESCRIPTION, "Test_description");
+		responseObj.put(ContentModel.PROP_CREATED, "Created");
+		responseObj.put(ContentModel.PROP_CREATOR, "test_user");
+
+		return responseObj;
+	}
+	
+	@Test
+	public void testControllerWithViewableFalseDataReqestData() {
+		requestData("search.json");
+		when(nodeService.getProperties(nodeRef)).thenReturn(setNodePropertiesForViewableFalse(nodeRef));
+		Map<String, Object> model = PlusDocumentSearch.executeImpl(req, null, null);
+		assertEquals("405", (String) model.get("code"));
+	}
+	
+	@Test
+	public void testControllerWithReqestDataForNoRecordFound() {
+		requestData("search.json");
+		List<NodeRef> nodeList = new ArrayList<NodeRef>();
+		when(resultSet.getNodeRefs()).thenReturn(nodeList);		
+		Map<String, Object> model = PlusDocumentSearch.executeImpl(req, null, null);
+		assertEquals("204", (String) model.get("code"));
+	}
+	
+	
+	
+	
+}
